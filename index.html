@@ -26,10 +26,22 @@
     }
 
     async function run() {
+      let currentRegion = 'unknown';
+      try {
+        const resp = await fetch('/api/ping');
+        currentRegion = await resp.text();
+      } catch (e) {
+        currentRegion = 'unknown (error fetching region)';
+      }
+
       const results = await Promise.all(endpoints.map(measureLatency));
-      const lines = results.map(r =>
-        r.ok ? `${r.name}: ${r.ms} ms` : `${r.name}: ${r.ms} ms (error: ${r.error})`
-      );
+      const lines = [
+        `This page is served from: ${currentRegion}`,
+        '',
+        ...results.map(r =>
+          r.ok ? `${r.name}: ${r.ms} ms` : `${r.name}: ${r.ms} ms (error: ${r.error})`
+        )
+      ];
       document.getElementById('results').textContent = lines.join('\n');
     }
 
